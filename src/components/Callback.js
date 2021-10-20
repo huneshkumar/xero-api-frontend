@@ -1,21 +1,26 @@
-import { Flex ,Spinner,Stack,HStack,Button,Input,Text} from '@chakra-ui/react'
+import { Flex ,useToast,Spinner,Stack,HStack,Button,Input,Text} from '@chakra-ui/react'
 import React,{useState} from 'react'
 import axios from "axios";
+import {GET_CONTACTS,ADD_CONTACTS} from '../client'
+import { gql, useQuery,useMutation} from '@apollo/client';
 const Callback = () => {
-
+    const toast=useToast()
     const [name,setName]=useState()
     const [fname,setFname]=useState()
     const [lname,setLname]=useState()
     const [email,setEmail]=useState()
     const [phone,setPhone]=useState()
+    const [contactID,setContactID]=useState()
     const [text,setText]=useState()
-
+    const productData=useQuery(GET_CONTACTS)
+    const [addProfile,{loading:addLoading}]=useMutation(ADD_CONTACTS)
     const onLoading=()=>{
         setName("")
         setFname("")
         setLname("")
         setEmail("")
         setPhone("")
+
         return(
           
                 <Flex justify="center" align="center" minH="100vh" w="100%" >
@@ -30,8 +35,71 @@ const Callback = () => {
                 </Flex>
         )
     }
+
+
+    if (productData.loading||addLoading) return (
+        <Flex justify="center" align="center" minH="100vh" w="100%" >
+          <Stack spacing={4} p={8} borderRadius="lg">
+  
+            <Spinner thickness="4px"
+                     speed="0.65s"
+                     emptyColor="gray.200"
+                     color="navy"
+                     size="xl" />
+          </Stack>
+        </Flex>
+    )
    
-    const onSubmit=(e)=>{ 
+    
+
+
+        
+    
+    console.log(typeof(productName))
+       const onProfileADD=(contactId)=>{
+        const profileData={
+            name:fname+" "+lname,
+            contact_id:contactId
+            
+          }
+           addProfile({
+            variables:{
+                object:profileData
+            }
+           }).then(res => {
+        
+            productData.refetch()
+            setName("")
+            setFname("")
+            setLname("")
+            setEmail("")
+            setPhone("")
+            setContactID("")
+           
+            
+            toast({
+                title: "contact Added",
+                description: "added ",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+              })
+            
+                 })
+                 .catch(err => {
+                    toast({
+                        title: 'error',
+                        description: err,
+                        status: "error",
+                        duration: 3000,
+                        isClosable: true,
+                      })
+              console.log(err.message) })
+       }
+    
+    
+    
+       const onSubmit=(e)=>{ 
         e.preventDefault() 
             axios.post('http://localhost:5000/contact',{
                 name:name,
@@ -40,9 +108,11 @@ const Callback = () => {
                 email:email,
                 phone:phone
             }).then(res=>{
-                console.log(res.data)
-                window.location.reload(false);
-                    onLoading()
+                console.log(res.data.contacts[0].contactID)
+                setContactID(res.data.contacts[0].contactID)
+                onProfileADD(res.data.contacts[0].contactID)
+                // window.location.reload(false);
+                //     onLoading()
                
            
 
@@ -52,6 +122,8 @@ const Callback = () => {
                console.log(error)
            })
         }
+
+   
 
     return (
         <Flex display="Flex" alignItems="center" direction="row" justifyContent="center"w="100%">

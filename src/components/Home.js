@@ -9,7 +9,7 @@ const Home = () => {
         document.location = url;
       }
     const callApi=()=>{
-       axios.post('https://quiet-hollows-10626.herokuapp.com/')
+       axios.post('http://localhost:5000/')
        .then(res=>{
           console.log(res.data) 
           redirect(res.data)

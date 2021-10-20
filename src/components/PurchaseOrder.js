@@ -1,6 +1,8 @@
-import { Flex,Spinner ,Stack,HStack,Button,Input,Text} from '@chakra-ui/react'
+import { Flex,Spinner ,Stack,HStack,Button,Input,Text,Select} from '@chakra-ui/react'
 import React,{useState} from 'react'
 import axios from "axios";
+import {GET_CONTACTS,ADD_CONTACTS} from '../client'
+import { gql, useQuery,useMutation} from '@apollo/client';
 const PurchaseOrder = () => {
 
     const [contactId,setContactId]=useState()
@@ -8,6 +10,7 @@ const PurchaseOrder = () => {
     const [quantity,setQuantity]=useState()
     const [description,setDescription]=useState()
     const [datevalue,setDatevalue]=useState()
+    const productData=useQuery(GET_CONTACTS)
     const onLoading=()=>{
         setContactId()
         setAmount()
@@ -28,6 +31,18 @@ const PurchaseOrder = () => {
                 </Flex>
         )
     }
+    if (productData.loading) return (
+        <Flex justify="center" align="center" minH="100vh" w="100%" >
+          <Stack spacing={4} p={8} borderRadius="lg">
+  
+            <Spinner thickness="4px"
+                     speed="0.65s"
+                     emptyColor="gray.200"
+                     color="navy"
+                     size="xl" />
+          </Stack>
+        </Flex>
+    )
    
     const onSubmit=()=>{  
             axios.post('http://localhost:5000/purchase',{
@@ -55,7 +70,15 @@ const PurchaseOrder = () => {
                 <Text mb="10px" fontSize="15px" fontWeight="500">Create Invoice</Text>
                 <HStack>
                     <Text>Contact ID</Text>
-                    <Input defaultValue={contactId} onChange={(e)=>{setContactId(e.target.value)}}/>
+                    <Select defaultValue={contactId} onChange={(e)=>{setContactId(e.target.value)}} >
+                        {
+                            productData.data.xero_contacts.map((item)=>{
+                                return(
+                                    <option value={item.contact_id}>{item.name}</option>
+                                )
+                            })
+                        }
+                    </Select>
                 </HStack>
                 <HStack>
                     <Text>Amount</Text>

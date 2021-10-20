@@ -5,13 +5,15 @@ import Home from './components/Home';
 import {BrowserRouter as Router,Route} from 'react-router-dom'
 import Callback from './components/Callback';
 import TabsComp from './components/TabsComp';
-
+import { ApolloProvider } from '@apollo/client';
+import client from './client'
 
 const App = () => {
    
 
     return (
         <>
+         <ApolloProvider client={client}>
          <Router>
         <ChakraProvider>
          
@@ -20,6 +22,7 @@ const App = () => {
          
         </ChakraProvider>
         </Router>
+        </ApolloProvider>
         </>
     )
 }
